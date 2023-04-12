@@ -165,6 +165,13 @@ float3 _secondShadowMultColor
     int UIOrder = 36;
 > = {1.0,1.0,1.0};
 
+bool bUseShadowColors
+<
+    string UIGroup = "Parameter";
+    string UIName =  "Use Shadow Colors";
+    int UIOrder = 37;
+> = false;
+
 float _shiniess
 <
     string UIGroup = "Parameter";
@@ -173,7 +180,7 @@ float _shiniess
     float UIMin = 0.010;
     float UIMax = 150.000;
     float UIStep = 0.001;
-    int UIOrder = 37;
+    int UIOrder = 41;
 > = 10.0f;
 
 float _specMulti
@@ -183,21 +190,21 @@ float _specMulti
     float UIMin = 0.000;
     float UIMax = 255.000;
     float UIStep = 1.0;
-    int UIOrder = 38;
+    int UIOrder = 42;
 > = 1.0f;
 
 float _emission
 <
     string UIGroup = "Parameter";
     string UIName = "Emission Multipler";
-    int UIOrder = 39;
+    int UIOrder = 51;
 > = 0.0f;
 
 // float _emissionBloomFactor
 // <
 //     string UIGroup = "Parameter";
 //     string UIName = "Emission Bloom Multipler";
-//     int UIOrder = 40;
+//     int UIOrder = 52;
 // > = 1.0f;
 
 float3 _emissionColor
@@ -205,14 +212,14 @@ float3 _emissionColor
     string UIGroup = "Parameter";
     string UIName =  "Emission Color";
     string UIWidget = "Color";
-    int UIOrder = 41;
+    int UIOrder = 53;
 > = {1.0,1.0,1.0};
 
 float _UnLightWeight
 <
     string UIGroup = "Parameter";
     string UIName = "unLighting Weight";
-    int UIOrder = 42;
+    int UIOrder = 54;
 > = 0.0f;
 
 ///ColorWarmCold///
@@ -221,35 +228,35 @@ float _UnLightWeight
     <
         string UIGroup = "ColorWarmCold";
         string UIName = "Blue factor";
-        int UIOrder = 43;
+        int UIOrder = 63;
     > = 0.5f;
 
     float _yellow
     <
         string UIGroup = "ColorWarmCold";
         string UIName = "yellow factor";
-        int UIOrder = 44;
+        int UIOrder = 64;
     > = 0.5f;
 
     float _gAlpha
     <
         string UIGroup = "ColorWarmCold";
         string UIName = "CoolColor factor";
-        int UIOrder = 45;
+        int UIOrder = 65;
     > = 0.1f;
 
     float _gBeta
     <
         string UIGroup = "ColorWarmCold";
         string UIName = "WarmColor factor";
-        int UIOrder = 46;
+        int UIOrder = 66;
     > = 0.1f;
 
     float _gface
     <
         string UIGroup = "ColorWarmCold";
         string UIName = "CoolWarm Cool Tinted";
-        int UIOrder = 47;
+        int UIOrder = 67;
     > = 0.0f;
 #endif
 
