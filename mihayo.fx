@@ -284,6 +284,27 @@ Texture2D gLightinfoTex
     int UIOrder = 21;
 >;
 
+Texture2D gFirstShadowTex
+<
+    string UIGroup = "Maps";
+    string ResourceName = "white.tga";
+    string ResourceType = "2D";
+    string UIName = "First ShadowColor Map";
+    int mipmaplevels = 0;
+    int UIOrder = 22;
+>;
+
+Texture2D gSecondShadowTex
+<
+    string UIGroup = "Maps";
+    string ResourceName = "white.tga";
+    string ResourceType = "2D";
+    string UIName = "Second ShadowColor Map";
+    int mipmaplevels = 0;
+    int UIOrder = 23;
+>;
+
+
 
 ////////////////////////////////////////
 ////// Debug ///////////////////////////
