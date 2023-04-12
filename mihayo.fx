@@ -193,6 +193,14 @@ float _specMulti
     int UIOrder = 42;
 > = 1.0f;
 
+float3 _specularColor
+<
+    string UIGroup = "Parameter";
+    string UIName =  "Specular Color Tint";
+    string UIWidget = "Color";
+    int UIOrder = 43;
+> = {1.0,1.0,1.0};
+
 float _emission
 <
     string UIGroup = "Parameter";
