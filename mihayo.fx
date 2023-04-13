@@ -7,6 +7,7 @@
 // Settings
 #define _DEBUG_
 #undef _USE_WARM_COOL_
+#define _USE_RIM_LIGHT_
 
 // Constant Parameters
 #define PI 3.1415926
@@ -92,11 +93,17 @@ bool tAuthor_2
     int UIOrder = 11;
 > = true;
 
-
-bool bConstantOutline
+bool bUseZFix
 <
     string UIGroup = "Outline Parameter";
-    string UIName =  "Constant Outline Width";
+    string UIName =  "Use Z Offset";
+    int UIOrder = 19;
+> = false;
+
+bool bKeepOutlineWidth
+<
+    string UIGroup = "Outline Parameter";
+    string UIName =  "Keep Outline Width";
     int UIOrder = 20;
 > = false;
 
@@ -184,7 +191,7 @@ bool bUseShadowColors
     string UIGroup = "Base Parameter";
     string UIName =  "Use Shadow Colors";
     int UIOrder = 37;
-> = false;
+> = true;
 
 float _shiniess
 <
@@ -222,6 +229,31 @@ bool bUseSpecularColor
     int UIOrder = 44;
 > = false;
 
+
+/// Rim Light ///
+#ifdef _USE_RIM_LIGHT_
+    float _RimMulti
+    <
+        string UIGroup = "Specular Parameter";
+        string UIName = "Rim Multipler";
+        float UIMin = 0.000;
+        float UIMax = 1.000;
+        float UIStep = 0.01;
+        int UIOrder = 45;
+    > = 1.0f;
+
+    float _RimPow
+    <
+        string UIGroup = "Specular Parameter";
+        string UIName = "Rim Pow Times";
+        float UIMin = 0.01;
+        float UIMax = 150.000;
+        float UIStep = 0.01;
+        int UIOrder = 46;
+    > = 48.0f;
+#endif
+
+
 float _emission
 <
     string UIGroup = "Unlight Parameter";
@@ -251,43 +283,45 @@ float _UnLightWeight
     int UIOrder = 54;
 > = 0.0f;
 
-///ColorWarmCold///
+///Color WarmCold///
 #ifdef _USE_WARM_COOL_
     float _blue
     <
-        string UIGroup = "ColorWarmCold";
+        string UIGroup = "Color WarmCold";
         string UIName = "Blue factor";
         int UIOrder = 63;
     > = 0.5f;
 
     float _yellow
     <
-        string UIGroup = "ColorWarmCold";
+        string UIGroup = "Color WarmCold";
         string UIName = "yellow factor";
         int UIOrder = 64;
     > = 0.5f;
 
     float _gAlpha
     <
-        string UIGroup = "ColorWarmCold";
+        string UIGroup = "Color WarmCold";
         string UIName = "CoolColor factor";
         int UIOrder = 65;
     > = 0.1f;
 
     float _gBeta
     <
-        string UIGroup = "ColorWarmCold";
+        string UIGroup = "Color WarmCold";
         string UIName = "WarmColor factor";
         int UIOrder = 66;
     > = 0.1f;
 
     float _gface
     <
-        string UIGroup = "ColorWarmCold";
+        string UIGroup = "Color WarmCold";
         string UIName = "CoolWarm Cool Tinted";
         int UIOrder = 67;
     > = 0.0f;
 #endif
+
+
 
 SamplerState BaseTexSampler
 {
@@ -384,6 +418,7 @@ float enumChannelChooser
     int UIOrder = 101;
 > = 0;
 
+
 ////////////////////////////////////////
 ////// Structs /////////////////////////
 ////////////////////////////////////////
@@ -412,6 +447,7 @@ struct v2f
     float4 tangent      : TANGENT;
     float4 binormal     : BINORMAL;
     float4 vertexColor  : TEXCOORD1;
+    float4 cameraDir    : TEXCOORD2;
 };
 
 
@@ -489,10 +525,10 @@ float3 getCameraPos ()
     return ViewToWorld[3].xyz;
 }
 
-float fixCameraLengthOp (float3 position_ws, half scale=0.001)
+float fixCameraLengthOp (float3 pos, half scale=0.001)
 {
-    float camLength = length(position_ws - getCameraPos());
-    return bConstantOutline ? (scale * camLength * 0.1) : (scale / camLength);
+    float camLength = length(pos - getCameraPos());
+    return bKeepOutlineWidth ? (scale * camLength * 0.1) : (scale / camLength);
 }
 
 ////////////////////////////////////////
@@ -523,6 +559,30 @@ float3 recomputeVtxNormal(double4 vtx)
     return float3(vtx.x, vtx.y, vtx.z);
 }
 
+////////////////////////////////////////
+////// fresnel /////////////////////////
+////////////////////////////////////////
+
+/* Compute fresnel Ranges */
+float fresnel( float3 vNormal, float3 vEyeDir )
+{
+	float fresnel = 1-saturate( dot( vNormal, vEyeDir ) );				// 1-(N.V) for Fresnel term
+	return fresnel * fresnel;											// Square for a more subtle look
+}
+
+float FresnelRange(float3 vNormal, float3 vEyeDir, float3 vRanges)
+{
+
+	float result, f = fresnel( vNormal, vEyeDir );			// Traditional Fresnel
+
+	if ( f > 0.5f )
+		result = lerp( vRanges.y, vRanges.z, (2*f)-1 );		// Blend between mid and high values
+	else
+        result = lerp( vRanges.x, vRanges.y, 2*f );			// Blend between low and mid values
+
+	return result;
+}
+
 
 /*Here my Shader Function*/
 
@@ -539,7 +599,10 @@ shared v2f shader_outline_vs (in a2v v)
     o.pos = mul(v.vertex, ObjectToView); // ViewSpace position
     float offsetValue = fixCameraLengthOp(o.pos.xyz, _outlineWeightScale);
     float4 vertexOffset = float4( v.vertex.xyz + (offsetValue * v.normal.xyz) * abs(v.vertexColor.zzz) , 1.0);
-    o.pos = mul(vertexOffset, ObjectToProj);
+    o.pos = mul(vertexOffset, ObjectToView);
+    o.pos.z += bUseZFix ? -offsetValue : 0.0;
+    o.pos = mul(o.pos, ViewToProj);
+
     return o;
 
 };
@@ -556,7 +619,9 @@ shared v2f shader_vs (in a2v v)
     v2f o;
     o.uv.x = v.uv.x;o.uv.y = UV_FLIP * v.uv.y;
     o.uv.z = v.uv2.x;o.uv.w = UV_FLIP * v.uv2.y;
-    o.pos = mul(float4(v.vertex.xyz,1.0),ObjectToProj);
+    float4 vtxWsPos = mul(v.vertex, ObjectToWorld);
+    o.cameraDir.xyz = normalize(getCameraPos() - vtxWsPos.xyz);
+    o.pos = mul(vtxWsPos, WorldToProj);
     o.normal.xyz = normalize(mul(v.normal.xyz,(float3x3)ObjectToWorld_IT));
     o.binormal.xyz = normalize(mul(v.binormal.xyz,(float3x3)ObjectToWorld_IT));
     o.tangent.xyz = normalize(mul(v.tangent.xyz,(float3x3)ObjectToWorld_IT));
@@ -574,7 +639,7 @@ shared float4 shader_ps (v2f i) : SV_Target
     // clip as early as possible
     //OpacityMaskClip(i.UV);
     float3 L = normalize(gLamp0Dir);
-    float3 V = (getCameraDir());//matrix methon(uniform direction)
+    float3 V = (i.cameraDir.xyz);//matrix methon(uniform direction)
     float3 N = (i.normal.xyz);
     float3 H = normalize(L+V);
 
@@ -582,6 +647,7 @@ shared float4 shader_ps (v2f i) : SV_Target
         /*LightInfo.r == Specular Mask*/
         /*LightInfo.g == Shadow Offset*/
         /*LightInfo.b == Shiniess offset Mask*/
+        /*LightInfo.a == Rim Mask*/
     float4 lightInfo = gLightinfoTex.Sample(BaseTexSampler,i.uv.xy);
     float4 mainColor = powerGamma(gMainTex.Sample(BaseTexSampler,i.uv.xy)); // Decode gamma into linear;
 
@@ -632,9 +698,16 @@ shared float4 shader_ps (v2f i) : SV_Target
 
     /*Compute Specular*/
         /*Cheap methon*/
-    float NdotH = dot(N,H);
+    //float NdotH = dot(N, normalize(gLamp0Dir + getCameraDir()));
+    float NdotH = dot(N, H);
     float shinePow = pow(max(NdotH,0.0),_shiniess);
-    float3 spec = shinePow + lightInfo.z > 1.0f ? lightInfo.x * _specMulti * curSpecularCol : float3(0.0,0.0,0.0);
+    float3 spec = shinePow + lightInfo.z > 1.0f ? lightInfo.x * _specMulti : float3(0.0,0.0,0.0);
+
+    /*Compute RimLight*/
+    #ifdef _USE_RIM_LIGHT_
+        float fFresnel = pow( fresnel(N, V) , _RimPow) * 16 * pow(fresnel(normalize(gLamp0Dir + V),V) , 16) * 16;
+        spec += lightInfo.a * fFresnel * _RimMulti;
+    #endif
 
     /*Compute Emission*/
     float4 emission;
@@ -644,7 +717,7 @@ shared float4 shader_ps (v2f i) : SV_Target
     //diffuse.rgb += spec.rgb;
     //diffuse.rgb += emission.rgb;
 
-    float4 finalColor = float4(lerp((diffuse.rgb + spec) * gLamp0Color.rgb, emission.rgb, _UnLightWeight), 1);
+    float4 finalColor = float4(lerp((diffuse.rgb + spec * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _UnLightWeight), 1);
 
     /*debug Here*/
     #ifdef _DEBUG_
