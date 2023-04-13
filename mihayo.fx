@@ -344,9 +344,10 @@ Texture2D gMainTex
 Texture2D gLightinfoTex
 <
     string UIGroup = "Maps";
-    /*.r == Specular Mask*/
-    /*.g == Shadow Offset*/
-    /*.b == Shiniess offset Mask*/
+    /*LightInfo.r == Specular Mask*/
+    /*LightInfo.g == Shadow Offset*/
+    /*LightInfo.b == Shiniess offset Mask*/
+    /*LightInfo.a == Rim Mask*/
     string ResourceName = "ctrl.tga";
     string ResourceType = "2D";
     string UIName = "Light Infomation Map";
