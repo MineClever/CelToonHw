@@ -302,7 +302,7 @@ Texture2D gLightinfoTex
 Texture2D gFirstShadowTex
 <
     string UIGroup = "Maps";
-    string ResourceName = "white.tga";
+    string ResourceName = "grey.tga";
     string ResourceType = "2D";
     string UIName = "First ShadowColor Map";
     int mipmaplevels = 0;
@@ -312,7 +312,7 @@ Texture2D gFirstShadowTex
 Texture2D gSecondShadowTex
 <
     string UIGroup = "Maps";
-    string ResourceName = "white.tga";
+    string ResourceName = "dark.tga";
     string ResourceType = "2D";
     string UIName = "Second ShadowColor Map";
     int mipmaplevels = 0;
@@ -554,7 +554,6 @@ shared float4 shader_ps (v2f i) : SV_Target
     float unclampLambert = unclampLambertShader(N,L);
     float lambert = saturate(unclampLambert);//clamped
     float halfLambert = saturate(unclampLambert * 0.5 + 0.5);
-        //float halflambert = unclampLambert * 0.5 + 0.5;
 
     /*Compute Shadow*/
     float4 diffuse = {0.0f,0.0f,0.0f,1.0f};
