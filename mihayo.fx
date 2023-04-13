@@ -157,7 +157,7 @@ float _firstShadow
     float UIStep = 0.001;
     //数值越大越容易产生第一层阴影
     int UIOrder = 33;
-> = 0.2f;
+> = 0.5f;
 
 float _secondShadow
 <
@@ -168,7 +168,7 @@ float _secondShadow
     float UIStep = 0.001;
     //数值越大越容易产生第二层阴影
     int UIOrder = 34;
-> = 0.25f;
+> = 0.2f;
 
 float3 _firstShadowMultColor
 <

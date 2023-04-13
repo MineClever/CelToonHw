@@ -65,7 +65,7 @@ uniform SamplerSparse emission_color;
 uniform vec3 gLamp0Color;
 
 //: param custom {
-//: "default": 0.2,
+//: "default": 0.5,
 //: "label": "First Shadow Drop Value",
 //: "min": 0.0,
 //: "max": 1.0,
@@ -75,7 +75,7 @@ uniform vec3 gLamp0Color;
 uniform float _firstShadow;
 
 //: param custom {
-//: "default": 0.25,
+//: "default": 0.2,
 //: "label": "Second Shadow Drop Value",
 //: "min": 0.0,
 //: "max": 1.0,
@@ -114,7 +114,7 @@ uniform float _specMulti;
     //: "step": 0.01,
     //: "group" : "Specular Parameter"
     //: }
-    uniform float _RimMulti;
+    uniform float _rimMulti;
 
     //: param custom {
     //: "default": 48.0,
@@ -276,7 +276,7 @@ void shade(V2F inputs) {
     /*Compute RimLight*/
     #ifdef _USE_RIM_LIGHT_
         float fFresnel = pow( fresnel(N, V) , _rimPow) * 16 * pow(fresnel(normalize(L + V),V) , 16) * 16;
-        spec += lightInfo.a * fFresnel * _RimMulti;
+        spec += lightInfo.a * fFresnel * _rimMulti;
     #endif
 
     /*Compute Emission*/
