@@ -242,7 +242,7 @@ bool bUseSpecularColor
         int UIOrder = 45;
     > = 1.0f;
 
-    float _RimPow
+    float _rimPow
     <
         string UIGroup = "Specular Parameter";
         string UIName = "Rim Pow Times";
@@ -276,7 +276,7 @@ float3 _emissionColor
     int UIOrder = 53;
 > = {1.0,1.0,1.0};
 
-float _UnLightWeight
+float _unLightWeight
 <
     string UIGroup = "Unlight Parameter";
     string UIName = "unLighting Weight";
@@ -706,7 +706,7 @@ shared float4 shader_ps (v2f i) : SV_Target
 
     /*Compute RimLight*/
     #ifdef _USE_RIM_LIGHT_
-        float fFresnel = pow( fresnel(N, V) , _RimPow) * 16 * pow(fresnel(normalize(gLamp0Dir + V),V) , 16) * 16;
+        float fFresnel = pow( fresnel(N, V) , _rimPow) * 16 * pow(fresnel(normalize(gLamp0Dir + V),V) , 16) * 16;
         spec += lightInfo.a * fFresnel * _RimMulti;
     #endif
 
@@ -718,7 +718,7 @@ shared float4 shader_ps (v2f i) : SV_Target
     //diffuse.rgb += spec.rgb;
     //diffuse.rgb += emission.rgb;
 
-    float4 finalColor = float4(lerp((diffuse.rgb + saturate(spec) * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _UnLightWeight), 1);
+    float4 finalColor = float4(lerp((diffuse.rgb + saturate(spec) * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _unLightWeight), 1);
 
     /*debug Here*/
     #ifdef _DEBUG_

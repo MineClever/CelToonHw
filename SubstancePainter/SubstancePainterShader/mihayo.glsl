@@ -54,9 +54,15 @@ uniform SamplerSparse second_shadow_color;
 //: param auto channel_user5
 uniform SamplerSparse outline_color;
 
+//: param auto channel_emissive
+uniform SamplerSparse emission_color;
+
 
 //////////////////////////////////////////////////////
 /* Parameters */
+
+//: param custom { "default": 1, "label": "Light Color", "widget": "color", "group" : "Light Parameter" }
+uniform vec3 gLamp0Color;
 
 //: param custom {
 //: "default": 0.2,
@@ -118,8 +124,28 @@ uniform float _specMulti;
     //: "step": 0.001,
     //: "group" : "Specular Parameter"
     //: }
-    uniform float _RimPow;
+    uniform float _rimPow;
 #endif
+
+//: param custom {
+//: "default": 1.0,
+//: "label": "Emission Multipler",
+//: "min": 0.0,
+//: "max": 1.0,
+//: "step": 0.01,
+//: "group" : "Unlight Parameter"
+//: }
+uniform float _emission;
+
+//: param custom {
+//: "default": 0.0,
+//: "label": "unLighting Weight",
+//: "min": 0.0,
+//: "max": 1.0,
+//: "step": 0.01,
+//: "group" : "Unlight Parameter"
+//: }
+uniform float _unLightWeight;
 
 
 //////////////////////////////////////////////////////
@@ -181,7 +207,7 @@ float fresnel( vec3 vNormal, vec3 vEyeDir )
 
 float getMaskValue(vec4 sampledValue, float defaultValue)
 {
-  return sampledValue.r + DEFAULT_METALLIC * (1.0 - sampledValue.g);
+  return sampledValue.r + defaultValue * (1.0 - sampledValue.g);
 }
 
 float getMaskValue(SamplerSparse sampler, SparseCoord coord, float defaultValue)
@@ -205,7 +231,7 @@ void shade(V2F inputs) {
     // Build LightInfo
     vec4 lightInfo;
     lightInfo.r = getMaskValue(specular_level_mask , sp_uv , 0.0f);
-    lightInfo.g = getMaskValue(shadow_offset , sp_uv , 1.0f);
+    lightInfo.g = getMaskValue(shadow_offset , sp_uv , 0.25f);
     lightInfo.b = getMaskValue(shiniess_offset , sp_uv , 0.0f);
     lightInfo.a = getMaskValue(rim_mask , sp_uv , 1.0f);
 
@@ -249,12 +275,16 @@ void shade(V2F inputs) {
 
     /*Compute RimLight*/
     #ifdef _USE_RIM_LIGHT_
-        float fFresnel = pow( fresnel(N, V) , _RimPow) * 16 * pow(fresnel(normalize(L + V),V) , 16) * 16;
+        float fFresnel = pow( fresnel(N, V) , _rimPow) * 16 * pow(fresnel(normalize(L + V),V) , 16) * 16;
         spec += lightInfo.a * fFresnel * _RimMulti;
     #endif
 
-    diffuse.rgb = (diffuse.rgb + saturate(spec) * curSpecularCol);
+    /*Compute Emission*/
+    vec3 emission;
+    emission.rgb = mainColor.rgb * getBaseColor(emission_color, sp_uv) *_emission;
 
     // Export to Viewport
+    diffuse.rgb = mix((diffuse.rgb + saturate(spec) * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _unLightWeight);
     diffuseShadingOutput(diffuse);
+
 }
