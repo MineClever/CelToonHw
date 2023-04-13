@@ -93,10 +93,16 @@ bool tAuthor_2
 > = true;
 
 
+bool bConstantOutline
+<
+    string UIGroup = "Outline Parameter";
+    string UIName =  "Constant Outline Width";
+    int UIOrder = 20;
+> = false;
 
 float3 _outlineColor
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Outline Parameter";
     string UIName =  "Outline Color";
     string UIWidget = "Color";
     int UIOrder = 21;
@@ -104,7 +110,7 @@ float3 _outlineColor
 
 float _outlineWeightScale
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Outline Parameter";
     string UIName = "Outline Scale";
     float UIMin = 0.000;
     float UIMax = 10.000;
@@ -112,24 +118,32 @@ float _outlineWeightScale
     int UIOrder = 22;
 > = 1.0f;
 
-bool bUseSurfaceColor
+bool bUseOutlineColor
 <
-    string UIGroup = "Parameter";
-    string UIName =  "Use surface Color";
-    int UIOrder = 32;
+    string UIGroup = "Outline Parameter";
+    string UIName =  "Use Outline Color";
+    int UIOrder = 23;
 > = false;
+
 
 float3 gSurfaceColor : DIFFUSE
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Base Parameter";
     string UIName =  "Surface Color";
     string UIWidget = "Color";
     int UIOrder = 31;
 > = {1.0,1.0,1.0};
 
+bool bUseSurfaceColor
+<
+    string UIGroup = "Base Parameter";
+    string UIName =  "Use surface Color";
+    int UIOrder = 32;
+> = false;
+
 float _firstShadow
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Base Parameter";
     string UIName = "First Shadow Drop Value";
     float UIMin = 0.000;
     float UIMax = 1.000;
@@ -140,7 +154,7 @@ float _firstShadow
 
 float _secondShadow
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Base Parameter";
     string UIName = "Second Shadow Drop Value";
     float UIMin = 0.000;
     float UIMax = 1.000;
@@ -151,7 +165,7 @@ float _secondShadow
 
 float3 _firstShadowMultColor
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Base Parameter";
     string UIName =  "First Shadow Color";
     string UIWidget = "Color";
     int UIOrder = 35;
@@ -159,7 +173,7 @@ float3 _firstShadowMultColor
 
 float3 _secondShadowMultColor
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Base Parameter";
     string UIName =  "Second Shadow Color";
     string UIWidget = "Color";
     int UIOrder = 36;
@@ -167,14 +181,14 @@ float3 _secondShadowMultColor
 
 bool bUseShadowColors
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Base Parameter";
     string UIName =  "Use Shadow Colors";
     int UIOrder = 37;
 > = false;
 
 float _shiniess
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Specular Parameter";
     string UIName = "Pow Shiness Times";
     string UIWidget = "Slider";
     float UIMin = 0.010;
@@ -185,7 +199,7 @@ float _shiniess
 
 float _specMulti
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Specular Parameter";
     string UIName = "Specular Multipler";
     float UIMin = 0.000;
     float UIMax = 255.000;
@@ -195,29 +209,36 @@ float _specMulti
 
 float3 _specularColor
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Specular Parameter";
     string UIName =  "Specular Color Tint";
     string UIWidget = "Color";
     int UIOrder = 43;
 > = {1.0,1.0,1.0};
 
+bool bUseSpecularColor
+<
+    string UIGroup = "Specular Parameter";
+    string UIName =  "Use Specular Color Tint";
+    int UIOrder = 44;
+> = false;
+
 float _emission
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Unlight Parameter";
     string UIName = "Emission Multipler";
     int UIOrder = 51;
 > = 0.0f;
 
 // float _emissionBloomFactor
 // <
-//     string UIGroup = "Parameter";
+//     string UIGroup = "Unlight Parameter";
 //     string UIName = "Emission Bloom Multipler";
 //     int UIOrder = 52;
 // > = 1.0f;
 
 float3 _emissionColor
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Unlight Parameter";
     string UIName =  "Emission Color";
     string UIWidget = "Color";
     int UIOrder = 53;
@@ -225,7 +246,7 @@ float3 _emissionColor
 
 float _UnLightWeight
 <
-    string UIGroup = "Parameter";
+    string UIGroup = "Unlight Parameter";
     string UIName = "unLighting Weight";
     int UIOrder = 54;
 > = 0.0f;
@@ -268,12 +289,12 @@ float _UnLightWeight
     > = 0.0f;
 #endif
 
-SamplerState SamplerClamped
+SamplerState BaseTexSampler
 {
     Filter = ANISOTROPIC;
     AddressU = Wrap;
     AddressV = Wrap;
-    BorderColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    BorderColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 };
 
 Texture2D gMainTex
@@ -283,7 +304,7 @@ Texture2D gMainTex
     string ResourceType = "2D";
     string UIName = "baseColor Map";
     int mipmaplevels = 0;
-    int UIOrder = 20;
+    int UIOrder = 90;
 >;
 
 Texture2D gLightinfoTex
@@ -296,7 +317,7 @@ Texture2D gLightinfoTex
     string ResourceType = "2D";
     string UIName = "Light Infomation Map";
     int mipmaplevels = 0;
-    int UIOrder = 21;
+    int UIOrder = 91;
 >;
 
 Texture2D gFirstShadowTex
@@ -306,7 +327,7 @@ Texture2D gFirstShadowTex
     string ResourceType = "2D";
     string UIName = "First ShadowColor Map";
     int mipmaplevels = 0;
-    int UIOrder = 22;
+    int UIOrder = 92;
 >;
 
 Texture2D gSecondShadowTex
@@ -316,9 +337,28 @@ Texture2D gSecondShadowTex
     string ResourceType = "2D";
     string UIName = "Second ShadowColor Map";
     int mipmaplevels = 0;
-    int UIOrder = 23;
+    int UIOrder = 93;
 >;
 
+Texture2D gSpecualColorTex
+<
+    string UIGroup = "Maps";
+    string ResourceName = "white.tga";
+    string ResourceType = "2D";
+    string UIName = "SpecularColor Map";
+    int mipmaplevels = 0;
+    int UIOrder = 94;
+>;
+
+Texture2D gOutlineColorTex
+<
+    string UIGroup = "Maps";
+    string ResourceName = "black.tga";
+    string ResourceType = "2D";
+    string UIName = "OutlineColor Map";
+    int mipmaplevels = 0;
+    int UIOrder = 95;
+>;
 
 
 ////////////////////////////////////////
@@ -379,29 +419,22 @@ struct v2f
 
 
 
-float GammaToLinear(float img)
-{
-    #ifndef _USE_SRGB_
-        return pow(abs(img),_GAMMA_NUM_);
-    #else
-        int cutoff = img < (0.04045) ? 1 : 0;
-        float higher = pow((img + (0.055))/(1.055), (2.4));
-        float lower = img/(12.92);
-        return lerp(higher, lower, cutoff);
-    #endif
-}
-
-float2 GammaToLinear(float2 img)
+float powerGamma(float img)
 {
     return pow(abs(img),_GAMMA_NUM_);
 }
 
-float3 GammaToLinear(float3 img)
+float2 powerGamma(float2 img)
 {
     return pow(abs(img),_GAMMA_NUM_);
 }
 
-float4 GammaToLinear(float4 img)
+float3 powerGamma(float3 img)
+{
+    return pow(abs(img),_GAMMA_NUM_);
+}
+
+float4 powerGamma(float4 img)
 {
     return float4(pow(abs(img).rgb,_GAMMA_NUM_),img.a);
 }
@@ -409,10 +442,11 @@ float4 GammaToLinear(float4 img)
 ////////////////////////////////////////
 ////// Normal //////////////////////////
 ////////////////////////////////////////
-float3 UnpackNormal (float3 map)
+float3 unpackZeroOne (float3 map)
 {
     return (map.rgb * 2.0f - 1.0f);
 }
+
 ////////////////////////////////////////
 ////// Lighting ////////////////////////
 ////////////////////////////////////////
@@ -423,7 +457,7 @@ float unclampLambertShader(in float3 N,in float3 L)
 }
 float3 RampLighting (float U ,float V,Texture2D rampmap)
 {
-    return GammaToLinear(rampmap.SampleLevel( SamplerClamped, float2(U,V),0).rgb);
+    return powerGamma(rampmap.SampleLevel( BaseTexSampler, float2(U,V),0).rgb);
 }
 
 ////////////////////////////////////////
@@ -458,7 +492,7 @@ float3 getCameraPos ()
 float fixCameraLengthOp (float3 position_ws, half scale=0.001)
 {
     float camLength = length(position_ws - getCameraPos());
-    return (scale / camLength);
+    return bConstantOutline ? (scale * camLength * 0.1) : (scale / camLength);
 }
 
 ////////////////////////////////////////
@@ -496,12 +530,14 @@ shared v2f shader_outline_vs (in a2v v)
 { // Offset vex pos by normal direction ...
     /*BasePart*/
     v2f o;
+    /* Sample outline color into uv */
+    o.uv.xyz =  bUseOutlineColor ? _outlineColor : powerGamma(gOutlineColorTex.SampleLevel(BaseTexSampler,v.uv.xy,0).rgb);
+
     /* Make outline shell */
-    o.normal.xyz =  normalize(mul(v.normal.xyz, (float3x3)ObjectToWorld_IT));
     // Fix distance from view
     o.pos = mul(float4(v.vertex.xyz,1.0), ObjectToView); // ViewSpace position
     float offsetValue = fixCameraLengthOp(o.pos.xyz, _outlineWeightScale);
-    float4 vertexOffset = float4( v.vertex.xyz + (offsetValue * o.normal.xyz) * abs(v.vertexColor.zzz) , 1.0);
+    float4 vertexOffset = float4( v.vertex.xyz + (offsetValue * v.normal.xyz) * abs(v.vertexColor.zzz) , 1.0);
     o.pos = mul(vertexOffset, ObjectToProj);
     return o;
 
@@ -510,7 +546,7 @@ shared v2f shader_outline_vs (in a2v v)
 //make outline PS
 shared float4 shader_outline_ps (v2f i) : SV_Target
 {
-    return float4(_outlineColor, 1.0);
+    return float4(i.uv.xyz, 1.0);
 }
 
 shared v2f shader_vs (in a2v v)
@@ -545,32 +581,37 @@ shared float4 shader_ps (v2f i) : SV_Target
         /*LightInfo.r == Specular Mask*/
         /*LightInfo.g == Shadow Offset*/
         /*LightInfo.b == Shiniess offset Mask*/
-    float4 lightInfo = gLightinfoTex.Sample(SamplerClamped,i.uv.xy);
-    float4 mainColor = gMainTex.Sample(SamplerClamped,i.uv.xy);
-    mainColor = GammaToLinear(mainColor); // Decode gamma into linear
-    mainColor.rgb = lerp(mainColor.rgb, gSurfaceColor.rgb,(int)bUseSurfaceColor);
+    float4 lightInfo = gLightinfoTex.Sample(BaseTexSampler,i.uv.xy);
+    float4 mainColor = powerGamma(gMainTex.Sample(BaseTexSampler,i.uv.xy)); // Decode gamma into linear;
+
+    mainColor.rgb = bUseSurfaceColor ? gSurfaceColor.rgb : mainColor.rgb;
+    half3 curFirstShadowCol = bUseShadowColors ? _firstShadowMultColor : gFirstShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb;
+    half3 curSecShadowCol = bUseShadowColors ? _secondShadowMultColor : gSecondShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb;
+    half3 curSpecularCol = bUseSpecularColor ? _specularColor : gSpecualColorTex.Sample(BaseTexSampler,i.uv.xy).rgb;
 
     /*Compute Lambert Shaders*/
     float unclampLambert = unclampLambertShader(N,L);
-    float lambert = saturate(unclampLambert);//clamped
-    float halfLambert = saturate(unclampLambert * 0.5 + 0.5);
+    #define lambert unclampLambert
+    float halfLambert = saturate(lambert * 0.5 + 0.5);
 
     /*Compute Shadow*/
     float4 diffuse = {0.0f,0.0f,0.0f,1.0f};
         /*first Shadow term */
     float diffuseMask = lightInfo.y * i.vertexColor.x;
     /*Shadow Core*/
+
+
         /*Step method*/
     if (diffuseMask > 0.1 )
     { /*(vtxColor.x * LightInfoMap.y + halfLambert) *0.5 - _firstShadow > 0*/
         float firstMask = diffuseMask > 0.5 ? diffuseMask * 1.2f - 0.1f : diffuseMask * 1.25f - 0.125f ;
         bool isLight = (firstMask + halfLambert) * 0.5 > _firstShadow;
-        diffuse.rgb = isLight ? mainColor.rgb : mainColor.rgb * _firstShadowMultColor;
+        diffuse.rgb = isLight ? mainColor.rgb : mainColor.rgb * curFirstShadowCol;
     }
     else /*second Shadow term*/
     { /*(vtxColor.x * LightInfoMap.y + halfLambert) *0.5 - _secondShadow > 0*/
         bool isFirst = (diffuseMask + halfLambert)* 0.5 > _secondShadow;
-        diffuse.rgb = isFirst ? mainColor.rgb * _firstShadowMultColor : mainColor.rgb * _secondShadowMultColor;
+        diffuse.rgb = isFirst ? mainColor.rgb * curFirstShadowCol : mainColor.rgb * curSecShadowCol;
     };
 
     /*Compute Diffuse Lighting*/
@@ -588,15 +629,11 @@ shared float4 shader_ps (v2f i) : SV_Target
         diffuse.rgb = 1-(1-k_gradient)*(1-diffuse.rgb); //screen fliter
     #endif
 
-    diffuse.rgb *= gLamp0Color.rgb;
-
     /*Compute Specular*/
         /*Cheap methon*/
     float NdotH = dot(N,H);
     float shinePow = pow(max(NdotH,0.0),_shiniess);
-
-    #define _lightSpecColor gLamp0Color
-    float3 spec = shinePow + lightInfo.z > 1.0f ? lightInfo.x * _specMulti * _lightSpecColor : float3(0.0,0.0,0.0);
+    float3 spec = shinePow + lightInfo.z > 1.0f ? lightInfo.x * _specMulti * curSpecularCol : float3(0.0,0.0,0.0);
 
     /*Compute Emission*/
     float4 emission;
@@ -605,7 +642,8 @@ shared float4 shader_ps (v2f i) : SV_Target
     /*final Color*/
     //diffuse.rgb += spec.rgb;
     //diffuse.rgb += emission.rgb;
-    float4 finalColor = float4(_UnLightWeight * emission.rgb + ( 1 - _UnLightWeight) * (diffuse.rgb + spec), 1);
+
+    float4 finalColor = float4(lerp((diffuse.rgb + spec) * gLamp0Color.rgb, emission.rgb, _UnLightWeight), 1);
 
     /*debug Here*/
     #ifdef _DEBUG_
