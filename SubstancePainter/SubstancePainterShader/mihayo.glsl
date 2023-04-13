@@ -1,10 +1,10 @@
 //////////////////////////////////////////////////////
 /* import from substance painter */
+// ref to : https://substance3d.adobe.com/documentation/spdoc/shader-api-89686018.html
+import lib-sampler.glsl
 
-// Defines the SamplerSparse structure
-// ref to : https://substance3d.adobe.com/documentation/spdoc/all-engine-params-shader-api-188976087.html
-import lib-sparse.glsl
-
+/* Settings */
+#define _USE_RIM_LIGHT_
 
 //////////////////////////////////////////////////////
 /* Substance Render Engine */
@@ -78,6 +78,48 @@ uniform float _firstShadow;
 //: }
 uniform float _secondShadow;
 
+//: param custom {
+//: "default": 10.0,
+//: "label": "Pow Shiness Times",
+//: "min": 0.0,
+//: "max": 150.0,
+//: "step": 0.001,
+//: "group" : "Specular Parameter"
+//: }
+uniform float _shiniess;
+
+//: param custom {
+//: "default": 1.0,
+//: "label": "Specular Multipler",
+//: "min": 0.0,
+//: "max": 255.0,
+//: "step": 1.0,
+//: "group" : "Specular Parameter"
+//: }
+uniform float _specMulti;
+
+/// Rim Light ///
+#ifdef _USE_RIM_LIGHT_
+    //: param custom {
+    //: "default": 1.0,
+    //: "label": "Rim Multipler",
+    //: "min": 0.0,
+    //: "max": 1.0,
+    //: "step": 0.01,
+    //: "group" : "Specular Parameter"
+    //: }
+    uniform float _RimMulti;
+
+    //: param custom {
+    //: "default": 48.0,
+    //: "label": "Rim Pow Times",
+    //: "min": 0.0,
+    //: "max": 150.0,
+    //: "step": 0.001,
+    //: "group" : "Specular Parameter"
+    //: }
+    uniform float _RimPow;
+#endif
 
 
 //////////////////////////////////////////////////////
@@ -122,6 +164,31 @@ float unclampLambertShader(in vec3 N,in vec3 L)
     return dot(N,L);
 }
 
+////////////////////////////////////////
+////// fresnel /////////////////////////
+////////////////////////////////////////
+
+/* Compute fresnel Ranges */
+float fresnel( vec3 vNormal, vec3 vEyeDir )
+{
+    float fresnel = 1-saturate( dot( vNormal, vEyeDir ) );				// 1-(N.V) for Fresnel term
+    return fresnel * fresnel;											// Square for a more subtle look
+}
+
+////////////////////////////////////////
+////// MaskSample //////////////////////
+////////////////////////////////////////
+
+float getMaskValue(vec4 sampledValue, float defaultValue)
+{
+  return sampledValue.r + DEFAULT_METALLIC * (1.0 - sampledValue.g);
+}
+
+float getMaskValue(SamplerSparse sampler, SparseCoord coord, float defaultValue)
+{
+  return getMaskValue(textureSparse(sampler, coord), defaultValue);
+}
+
 
 //////////////////////////////////////////////////////
 /* Main Fragment Shader */
@@ -132,7 +199,62 @@ void shade(V2F inputs) {
     vec3 V = normalize(uniform_world_eye_position.xyz - inputs.position.xyz);
     vec3 N = normalize(inputs.normal.xyz);
     vec3 H = normalize(L+V);
+    #define sp_uv inputs.sparse_coord
+    #define sp_vtxCol inputs.color[0]
+
+    // Build LightInfo
+    vec4 lightInfo;
+    lightInfo.r = getMaskValue(specular_level_mask , sp_uv , 0.0f);
+    lightInfo.g = getMaskValue(shadow_offset , sp_uv , 1.0f);
+    lightInfo.b = getMaskValue(shiniess_offset , sp_uv , 0.0f);
+    lightInfo.a = getMaskValue(rim_mask , sp_uv , 1.0f);
+
+    vec3 mainColor = getBaseColor(basecolor_tex, sp_uv);
+    vec3 curFirstShadowCol = getBaseColor(first_shadow_color,sp_uv);
+    vec3 curSecShadowCol = getBaseColor(second_shadow_color,sp_uv);
+    vec3 curSpecularCol = getBaseColor(specular_color,sp_uv);
+
+    /*Compute Lambert Shaders*/
+    float unclampLambert = unclampLambertShader(N,L);
+    #define lambert unclampLambert
+    float halfLambert = saturate(lambert * 0.5 + 0.5);
+
+    /*Compute Shadow*/
+    vec3 diffuse = vec3(0.0f,0.0f,0.0f);
+        /*first Shadow term */
+    float diffuseMask = lightInfo.y * sp_vtxCol.x;
+
+
+    /*Shadow Core*/
+        /*Step method*/
+    if (diffuseMask > 0.1 )
+    {
+        float firstMask = diffuseMask > 0.5 ? diffuseMask * 1.2f - 0.1f : diffuseMask * 1.25f - 0.125f ;
+        bool isLight = (firstMask + halfLambert) * 0.5 > _firstShadow;
+        diffuse.rgb = isLight ? mainColor.rgb : mainColor.rgb * curFirstShadowCol;
+    }
+    else /*second Shadow term*/
+    {
+        bool isFirst = (diffuseMask + halfLambert)* 0.5 > _secondShadow;
+        diffuse.rgb = isFirst ? mainColor.rgb * curFirstShadowCol : mainColor.rgb * curSecShadowCol;
+    };
+
+
+    /*Compute Specular*/
+        /*Cheap methon*/
+    //float NdotH = dot(N, normalize(gLamp0Dir + getCameraDir()));
+    float NdotH = dot(N, H);
+    float shinePow = pow(max(NdotH,0.0f),_shiniess);
+    vec3 spec = shinePow + lightInfo.z > 1.0f ? vec3(lightInfo.x * _specMulti) : vec3(0.0,0.0,0.0);
+
+    /*Compute RimLight*/
+    #ifdef _USE_RIM_LIGHT_
+        float fFresnel = pow( fresnel(N, V) , _RimPow) * 16 * pow(fresnel(normalize(L + V),V) , 16) * 16;
+        spec += lightInfo.a * fFresnel * _RimMulti;
+    #endif
+
+    diffuse.rgb = (diffuse.rgb + saturate(spec) * curSpecularCol);
 
     // Export to Viewport
-    diffuseShadingOutput(vec3(dot(N,L)));
+    diffuseShadingOutput(diffuse);
 }
