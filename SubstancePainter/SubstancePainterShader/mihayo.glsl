@@ -98,7 +98,7 @@ uniform float _shiniess;
 //: "default": 1.0,
 //: "label": "Specular Multipler",
 //: "min": 0.0,
-//: "max": 255.0,
+//: "max": 10.0,
 //: "step": 1.0,
 //: "group" : "Specular Parameter"
 //: }
@@ -284,7 +284,7 @@ void shade(V2F inputs) {
     emission.rgb = mainColor.rgb * getBaseColor(emission_color, sp_uv) *_emission;
 
     // Export to Viewport
-    diffuse.rgb = mix((diffuse.rgb + saturate(spec) * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _unLightWeight);
+    diffuse.rgb = mix((diffuse.rgb + (spec) * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _unLightWeight);
     diffuseShadingOutput(diffuse);
 
 }
