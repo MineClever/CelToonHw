@@ -195,7 +195,7 @@ float getMaskValue(SamplerSparse sampler, SparseCoord coord, float defaultValue)
 
 void shade(V2F inputs) {
     // Get Base Data
-    vec3 L = - normalize(uniform_main_light.xyz);
+    vec3 L = normalize(uniform_main_light.xyz);
     vec3 V = normalize(uniform_world_eye_position.xyz - inputs.position.xyz);
     vec3 N = normalize(inputs.normal.xyz);
     vec3 H = normalize(L+V);
