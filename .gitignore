@@ -1,3 +1,4 @@
 .vscode/settings.json
 *.swatch
 .mayaSwatches/
+*.painter_lock

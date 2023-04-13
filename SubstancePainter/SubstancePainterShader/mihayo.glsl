@@ -2,7 +2,8 @@
 /* import from substance painter */
 
 // Defines the SamplerSparse structure
-import lib-sparse.glsl // ref to : https://substance3d.adobe.com/documentation/spdoc/all-engine-params-shader-api-188976087.html
+// ref to : https://substance3d.adobe.com/documentation/spdoc/all-engine-params-shader-api-188976087.html
+import lib-sparse.glsl
 
 
 //////////////////////////////////////////////////////
@@ -68,7 +69,7 @@ uniform SamplerSparse outline_color;
 uniform float _firstShadow;
 
 //: param custom {
-//: "default": 0.2,
+//: "default": 0.25,
 //: "label": "Second Shadow Drop Value",
 //: "min": 0.0,
 //: "max": 1.0,
@@ -127,11 +128,11 @@ float unclampLambertShader(in vec3 N,in vec3 L)
 
 void shade(V2F inputs) {
     // Get Base Data
-    vec3 L = - normalize(uniform_main_light);
-    vec3 V = normalize(uniform_world_eye_position - inputs.position.xyz);
-    vec3 N = normalize(inputs.normal);
-    H = normalize(L+V);
+    vec3 L = - normalize(uniform_main_light.xyz);
+    vec3 V = normalize(uniform_world_eye_position.xyz - inputs.position.xyz);
+    vec3 N = normalize(inputs.normal.xyz);
+    vec3 H = normalize(L+V);
 
     // Export to Viewport
-    albedoOutput(vec3);
+    diffuseShadingOutput(vec3(dot(N,L)));
 }
