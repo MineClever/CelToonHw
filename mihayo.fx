@@ -532,10 +532,11 @@ shared v2f shader_outline_vs (in a2v v)
     v2f o;
     /* Sample outline color into uv */
     o.uv.xyz =  bUseOutlineColor ? _outlineColor : powerGamma(gOutlineColorTex.SampleLevel(BaseTexSampler,v.uv.xy,0).rgb);
+    o.uv.w = 1.0;
 
     /* Make outline shell */
     // Fix distance from view
-    o.pos = mul(float4(v.vertex.xyz,1.0), ObjectToView); // ViewSpace position
+    o.pos = mul(v.vertex, ObjectToView); // ViewSpace position
     float offsetValue = fixCameraLengthOp(o.pos.xyz, _outlineWeightScale);
     float4 vertexOffset = float4( v.vertex.xyz + (offsetValue * v.normal.xyz) * abs(v.vertexColor.zzz) , 1.0);
     o.pos = mul(vertexOffset, ObjectToProj);
@@ -546,7 +547,7 @@ shared v2f shader_outline_vs (in a2v v)
 //make outline PS
 shared float4 shader_outline_ps (v2f i) : SV_Target
 {
-    return float4(i.uv.xyz, 1.0);
+    return i.uv;
 }
 
 shared v2f shader_vs (in a2v v)
@@ -585,9 +586,9 @@ shared float4 shader_ps (v2f i) : SV_Target
     float4 mainColor = powerGamma(gMainTex.Sample(BaseTexSampler,i.uv.xy)); // Decode gamma into linear;
 
     mainColor.rgb = bUseSurfaceColor ? gSurfaceColor.rgb : mainColor.rgb;
-    half3 curFirstShadowCol = bUseShadowColors ? _firstShadowMultColor : gFirstShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb;
-    half3 curSecShadowCol = bUseShadowColors ? _secondShadowMultColor : gSecondShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb;
-    half3 curSpecularCol = bUseSpecularColor ? _specularColor : gSpecualColorTex.Sample(BaseTexSampler,i.uv.xy).rgb;
+    half3 curFirstShadowCol = bUseShadowColors  ? _firstShadowMultColor     : gFirstShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb;
+    half3 curSecShadowCol   = bUseShadowColors  ? _secondShadowMultColor    : gSecondShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb;
+    half3 curSpecularCol    = bUseSpecularColor ? _specularColor            : gSpecualColorTex.Sample(BaseTexSampler,i.uv.xy).rgb;
 
     /*Compute Lambert Shaders*/
     float unclampLambert = unclampLambertShader(N,L);
