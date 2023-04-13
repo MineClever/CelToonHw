@@ -717,7 +717,7 @@ shared float4 shader_ps (v2f i) : SV_Target
     //diffuse.rgb += spec.rgb;
     //diffuse.rgb += emission.rgb;
 
-    float4 finalColor = float4(lerp((diffuse.rgb + spec * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _UnLightWeight), 1);
+    float4 finalColor = float4(lerp((diffuse.rgb + saturate(spec) * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _UnLightWeight), 1);
 
     /*debug Here*/
     #ifdef _DEBUG_
