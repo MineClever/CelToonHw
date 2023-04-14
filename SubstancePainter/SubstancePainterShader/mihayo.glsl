@@ -61,7 +61,12 @@ uniform SamplerSparse emission_color;
 //////////////////////////////////////////////////////
 /* Parameters */
 
-//: param custom { "default": 1, "label": "Light Color", "widget": "color", "group" : "Light Parameter" }
+//: param custom {
+//: "default": 1,
+//: "label": "Light Color",
+//: "widget": "color",
+//: "group" : "Light Parameter"
+//: }
 uniform vec3 gLamp0Color;
 
 //: param custom {
