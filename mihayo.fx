@@ -321,7 +321,13 @@ float _unLightWeight
     > = 0.0f;
 #endif
 
-
+///Features///
+bool bUseConstantShadowCol
+<
+    string UIGroup = "Features";
+    string UIName =  "Use Constant Shadow Color";
+    int UIOrder = 44;
+> = false;
 
 SamplerState BaseTexSampler
 {

@@ -177,11 +177,18 @@ uniform float _unLightWeight;
 uniform bool bShowVtxCol;
 
 //: param custom {
-//: "default": true,
+//: "default": false,
 //: "label": "Use Mesh Vtx Color",
 //: "group" : "VtxColor Parameter"
 //: }
 uniform bool bUseVtxCol;
+
+//: param custom {
+//: "default": false,
+//: "label": "Use Constant Shadow Color",
+//: "group" : "Features"
+//: }
+uniform bool bUseConstantShadowCol;
 
 
 //////////////////////////////////////////////////////
@@ -290,16 +297,17 @@ void shade(V2F inputs) {
 
     /*Shadow Core*/
         /*Step method*/
+    vec3 preBaseColor = bUseConstantShadowCol ? vec3(1.0f) : mainColor.rgb;
     if (diffuseMask > 0.1 )
     {
         float firstMask = diffuseMask > 0.5 ? diffuseMask * 1.2f - 0.1f : diffuseMask * 1.25f - 0.125f ;
         bool isLight = (firstMask + halfLambert) * 0.5 > _firstShadow;
-        diffuse.rgb = isLight ? mainColor.rgb : mainColor.rgb * curFirstShadowCol;
+        diffuse.rgb = isLight ? mainColor.rgb : preBaseColor * curFirstShadowCol;
     }
     else /*second Shadow term*/
     {
         bool isFirst = (diffuseMask + halfLambert)* 0.5 > _secondShadow;
-        diffuse.rgb = isFirst ? mainColor.rgb * curFirstShadowCol : mainColor.rgb * curSecShadowCol;
+        diffuse.rgb = isFirst ? preBaseColor * curFirstShadowCol : preBaseColor * curSecShadowCol;
     };
 
 
@@ -319,7 +327,7 @@ void shade(V2F inputs) {
 
     /*Compute Emission*/
     vec3 emission;
-    emission.rgb = mainColor.rgb * getBaseColor(emission_color, sp_uv) *_emission;
+    emission.rgb = mainColor.rgb + getBaseColor(emission_color, sp_uv) *_emission;
 
     // Export to Viewport
     diffuse.rgb = mix((diffuse.rgb + (spec) * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _unLightWeight);
