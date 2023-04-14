@@ -280,8 +280,9 @@ void shade(V2F inputs) {
     lightInfo.a = getMaskValue(rim_mask , sp_uv , 1.0f);
 
     vec3 mainColor = getBaseColor(basecolor_tex, sp_uv);
-    vec3 curFirstShadowCol = getBaseColor(first_shadow_color,sp_uv);
-    vec3 curSecShadowCol = getBaseColor(second_shadow_color,sp_uv);
+    // Have to fix color gamma in user channel ...
+    vec3 curFirstShadowCol = pow(getBaseColor(first_shadow_color,sp_uv), vec3(2.2));
+    vec3 curSecShadowCol = pow(getBaseColor(second_shadow_color,sp_uv), vec3(2.2));
     vec3 curSpecularCol = getBaseColor(specular_color,sp_uv);
 
     /*Compute Lambert Shaders*/
