@@ -652,9 +652,10 @@ shared float4 shader_ps (v2f i) : SV_Target
         /*LightInfo.b == Shiniess offset Mask*/
         /*LightInfo.a == Rim Mask*/
     float4 lightInfo = gLightinfoTex.Sample(BaseTexSampler,i.uv.xy);
-    float4 mainColor = powerGamma(gMainTex.Sample(BaseTexSampler,i.uv.xy)); // Decode gamma into linear;
 
-    mainColor.rgb = bUseSurfaceColor ? gSurfaceColor.rgb : mainColor.rgb;
+    //Remerber to decode color in gamma-space
+    float4 mainColor = powerGamma(gMainTex.Sample(BaseTexSampler,i.uv.xy)); // Decode gamma into linear;
+    mainColor.rgb = bUseSurfaceColor ? gSurfaceColor.rgb : mainColor.rgb; // where using shader color ...
     half3 curFirstShadowCol = bUseShadowColors  ? _firstShadowMultColor     : powerGamma(gFirstShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb);
     half3 curSecShadowCol   = bUseShadowColors  ? _secondShadowMultColor    : powerGamma(gSecondShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb);
     half3 curSpecularCol    = bUseSpecularColor ? _specularColor            : powerGamma(gSpecualColorTex.Sample(BaseTexSampler,i.uv.xy).rgb);
