@@ -561,10 +561,6 @@ float remap(float origFrom, float origTo, float targetFrom, float targetTo, floa
     return lerp(targetFrom, targetTo, rel);
 }
 
-float3 recomputeVtxNormal(double4 vtx)
-{
-    return float3(vtx.x, vtx.y, vtx.z);
-}
 
 ////////////////////////////////////////
 ////// fresnel /////////////////////////
@@ -673,19 +669,18 @@ shared float4 shader_ps (v2f i) : SV_Target
         /*first Shadow term */
     float diffuseMask = lightInfo.y * i.vertexColor.x;
     /*Shadow Core*/
-
-
+    float3 preBaseColor = bUseConstantShadowCol ? float3(1.0f) : mainColor.rgb;
         /*Step method*/
     if (diffuseMask > 0.1 )
     { /*(vtxColor.x * LightInfoMap.y + halfLambert) *0.5 - _firstShadow > 0*/
         float firstMask = diffuseMask > 0.5 ? diffuseMask * 1.2f - 0.1f : diffuseMask * 1.25f - 0.125f ;
         bool isLight = (firstMask + halfLambert) * 0.5 > _firstShadow;
-        diffuse.rgb = isLight ? mainColor.rgb : mainColor.rgb * curFirstShadowCol;
+        diffuse.rgb = isLight ? mainColor.rgb : preBaseColor * curFirstShadowCol;
     }
     else /*second Shadow term*/
     { /*(vtxColor.x * LightInfoMap.y + halfLambert) *0.5 - _secondShadow > 0*/
         bool isFirst = (diffuseMask + halfLambert)* 0.5 > _secondShadow;
-        diffuse.rgb = isFirst ? mainColor.rgb * curFirstShadowCol : mainColor.rgb * curSecShadowCol;
+        diffuse.rgb = isFirst ? preBaseColor * curFirstShadowCol : preBaseColor * curSecShadowCol;
     };
 
     /*Compute Diffuse Lighting*/
@@ -718,7 +713,7 @@ shared float4 shader_ps (v2f i) : SV_Target
 
     /*Compute Emission*/
     float4 emission;
-    emission.rgb = mainColor.rgb * _emission * _emissionColor;
+    emission.rgb = mainColor.rgb + _emission * _emissionColor;
 
     /*final Color*/
     //diffuse.rgb += spec.rgb;
