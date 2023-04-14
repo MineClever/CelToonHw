@@ -160,8 +160,8 @@ uniform float _unLightWeight;
 uniform bool bShowVtxCol;
 
 //: param custom {
-//: "default": false,
-//: "label": "Use Vtx Color",
+//: "default": true,
+//: "label": "Use Mesh Vtx Color",
 //: "group" : "VtxColor Parameter"
 //: }
 uniform bool bUseVtxCol;
@@ -246,7 +246,7 @@ void shade(V2F inputs) {
     vec3 H = normalize(L+V);
     #define sp_uv inputs.sparse_coord
     #define sp_vtxCol inputs.color[0]
-    vec3 vtxColor = (true) ? sp_vtxCol.rgb : vec3(1.0f, 1.0f, 1.0f);
+    vec3 vtxColor = bUseVtxCol ? sp_vtxCol.rgb : vec3(1.0f, 1.0f, 1.0f);
 
     // Build LightInfo
     vec4 lightInfo;
@@ -291,11 +291,12 @@ void shade(V2F inputs) {
     //float NdotH = dot(N, normalize(gLamp0Dir + getCameraDir()));
     float NdotH = dot(N, H);
     float shinePow = pow(max(NdotH,0.0f),_shiniess);
-    vec3 spec = shinePow + lightInfo.z > 1.0f ? vec3(lightInfo.x * _specMulti) : vec3(0.0,0.0,0.0);
+    vec3 spec = shinePow + lightInfo.z > 1.0f ? vec3(lightInfo.x * _specMulti) : vec3(0.0f);
 
     /*Compute RimLight*/
     #ifdef _USE_RIM_LIGHT_
-        float fFresnel = pow( fresnel(N, V) , _rimPow) * 16 * pow(fresnel(normalize(L + V),V) , 16) * 16;
+        //float fFresnel = pow( fresnel(N, V) , _rimPow) * 16 * pow(fresnel(normalize(L + V),V) , 16) * 16;
+        float fFresnel = pow( fresnel(N, V) , _rimPow) * pow(fresnel(normalize(L + V),V) , 16) * 256;
         spec += lightInfo.a * fFresnel * _rimMulti;
     #endif
 
