@@ -653,9 +653,9 @@ shared float4 shader_ps (v2f i) : SV_Target
     float4 mainColor = powerGamma(gMainTex.Sample(BaseTexSampler,i.uv.xy)); // Decode gamma into linear;
 
     mainColor.rgb = bUseSurfaceColor ? gSurfaceColor.rgb : mainColor.rgb;
-    half3 curFirstShadowCol = bUseShadowColors  ? _firstShadowMultColor     : gFirstShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb;
-    half3 curSecShadowCol   = bUseShadowColors  ? _secondShadowMultColor    : gSecondShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb;
-    half3 curSpecularCol    = bUseSpecularColor ? _specularColor            : gSpecualColorTex.Sample(BaseTexSampler,i.uv.xy).rgb;
+    half3 curFirstShadowCol = bUseShadowColors  ? _firstShadowMultColor     : powerGamma(gFirstShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb);
+    half3 curSecShadowCol   = bUseShadowColors  ? _secondShadowMultColor    : powerGamma(gSecondShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb);
+    half3 curSpecularCol    = bUseSpecularColor ? _specularColor            : powerGamma(gSpecualColorTex.Sample(BaseTexSampler,i.uv.xy).rgb);
 
     /*Compute Lambert Shaders*/
     float unclampLambert = unclampLambertShader(N,L);
