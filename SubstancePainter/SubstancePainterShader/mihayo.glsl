@@ -152,6 +152,20 @@ uniform float _emission;
 //: }
 uniform float _unLightWeight;
 
+//: param custom {
+//: "default": false,
+//: "label": "Show Vtx Color",
+//: "group" : "VtxColor Parameter"
+//: }
+uniform bool bShowVtxCol;
+
+//: param custom {
+//: "default": false,
+//: "label": "Use Vtx Color",
+//: "group" : "VtxColor Parameter"
+//: }
+uniform bool bUseVtxCol;
+
 
 //////////////////////////////////////////////////////
 /* Convert from hlsl*/
@@ -232,6 +246,7 @@ void shade(V2F inputs) {
     vec3 H = normalize(L+V);
     #define sp_uv inputs.sparse_coord
     #define sp_vtxCol inputs.color[0]
+    vec3 vtxColor = (true) ? sp_vtxCol.rgb : vec3(1.0f, 1.0f, 1.0f);
 
     // Build LightInfo
     vec4 lightInfo;
@@ -253,7 +268,7 @@ void shade(V2F inputs) {
     /*Compute Shadow*/
     vec3 diffuse = vec3(0.0f,0.0f,0.0f);
         /*first Shadow term */
-    float diffuseMask = lightInfo.y * sp_vtxCol.x;
+    float diffuseMask = lightInfo.y * vtxColor.x;
 
 
     /*Shadow Core*/
@@ -290,6 +305,7 @@ void shade(V2F inputs) {
 
     // Export to Viewport
     diffuse.rgb = mix((diffuse.rgb + (spec) * curSpecularCol) * gLamp0Color.rgb, emission.rgb, _unLightWeight);
+    diffuse.rgb = mix(diffuse, vtxColor, int(bShowVtxCol));
     diffuseShadingOutput(diffuse);
 
 }
