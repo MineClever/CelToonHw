@@ -63,11 +63,28 @@ uniform SamplerSparse emission_color;
 
 //: param custom {
 //: "default": 1,
-//: "label": "Light Color",
+//: "label": "Lamp Color",
 //: "widget": "color",
-//: "group" : "Light Parameter"
+//: "group" : "Lamp Parameter"
 //: }
 uniform vec3 gLamp0Color;
+
+//: param custom {
+//: "default": false,
+//: "label": "Use Custom Lamp Position",
+//: "group" : "Lamp Parameter"
+//: }
+uniform bool bUseCustomLightPos;
+
+//: param custom {
+//: "default": [10, 10, -10],
+//: "label": "Custom Lamp Position",
+//: "min": -100.0,
+//: "max": 100.0,
+//: "step": 1.0,
+//: "group" : "Lamp Parameter"
+//: }
+uniform vec3 gLamp0Pos;
 
 //: param custom {
 //: "default": 0.5,
@@ -240,7 +257,7 @@ float getMaskValue(SamplerSparse sampler, SparseCoord coord, float defaultValue)
 
 void shade(V2F inputs) {
     // Get Base Data
-    vec3 L = normalize(uniform_main_light.xyz);
+    vec3 L = normalize(bUseCustomLightPos ? gLamp0Pos.xyz : uniform_main_light.xyz);
     vec3 V = normalize(uniform_world_eye_position.xyz - inputs.position.xyz);
     vec3 N = normalize(inputs.normal.xyz);
     vec3 H = normalize(L+V);
