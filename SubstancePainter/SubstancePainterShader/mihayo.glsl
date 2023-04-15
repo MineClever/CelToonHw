@@ -263,14 +263,19 @@ float getMaskValue(SamplerSparse sampler, SparseCoord coord, float defaultValue)
 /* Main Fragment Shader */
 
 void shade(V2F inputs) {
+
+    #define _WHITE_RGB_ vec3(1.0, 1.0, 1.0)
+    #define _BLACK_RGB_ vec3(0.0, 0.0, 0.0)
+    #define sp_uv inputs.sparse_coord
+    #define sp_vtxCol inputs.color[0]
+
     // Get Base Data
     vec3 L = normalize(bUseCustomLightPos ? gLamp0Pos.xyz : uniform_main_light.xyz);
     vec3 V = normalize(uniform_world_eye_position.xyz - inputs.position.xyz);
     vec3 N = normalize(inputs.normal.xyz);
     vec3 H = normalize(L+V);
-    #define sp_uv inputs.sparse_coord
-    #define sp_vtxCol inputs.color[0]
-    vec3 vtxColor = bUseVtxCol ? sp_vtxCol.rgb : vec3(1.0f, 1.0f, 1.0f);
+
+    vec3 vtxColor = bUseVtxCol ? sp_vtxCol.rgb : _WHITE_RGB_;
 
     // Build LightInfo
     vec4 lightInfo;
@@ -291,14 +296,14 @@ void shade(V2F inputs) {
     float halfLambert = saturate(lambert * 0.5 + 0.5);
 
     /*Compute Shadow*/
-    vec3 diffuse = vec3(0.0f,0.0f,0.0f);
+    vec3 diffuse = _BLACK_RGB_;
         /*first Shadow term */
     float diffuseMask = lightInfo.y * vtxColor.x;
 
 
     /*Shadow Core*/
         /*Step method*/
-    vec3 preBaseColor = bUseConstantShadowCol ? vec3(1.0f) : mainColor.rgb;
+    vec3 preBaseColor = bUseConstantShadowCol ? _WHITE_RGB_ : mainColor.rgb;
     if (diffuseMask > 0.1 )
     {
         float firstMask = diffuseMask > 0.5 ? diffuseMask * 1.2f - 0.1f : diffuseMask * 1.25f - 0.125f ;
