@@ -2,6 +2,8 @@
 /* import from substance painter */
 // ref to : https://substance3d.adobe.com/documentation/spdoc/shader-api-89686018.html
 import lib-sampler.glsl
+import lib-utils.glsl
+import lib-vectors.glsl
 
 /* Settings */
 #define _USE_RIM_LIGHT_
@@ -271,7 +273,8 @@ void shade(V2F inputs) {
 
     // Get Base Data
     vec3 L = normalize(bUseCustomLightPos ? gLamp0Pos.xyz : uniform_main_light.xyz);
-    vec3 V = normalize(uniform_world_eye_position.xyz - inputs.position.xyz);
+    //vec3 V = normalize(uniform_world_eye_position.xyz - inputs.position.xyz);
+    vec3 V = getEyeVec(inputs.position.xyz)
     vec3 N = normalize(inputs.normal.xyz);
     vec3 H = normalize(L+V);
 
@@ -286,8 +289,8 @@ void shade(V2F inputs) {
 
     vec3 mainColor = getBaseColor(basecolor_tex, sp_uv);
     // Have to fix color gamma in user channel ...
-    vec3 curFirstShadowCol = pow(getBaseColor(first_shadow_color,sp_uv), vec3(2.2));
-    vec3 curSecShadowCol = pow(getBaseColor(second_shadow_color,sp_uv), vec3(2.2));
+    vec3 curFirstShadowCol = sRGB2linear(getBaseColor(first_shadow_color,sp_uv));
+    vec3 curSecShadowCol = sRGB2linear(getBaseColor(second_shadow_color,sp_uv));
     vec3 curSpecularCol = getBaseColor(specular_color,sp_uv);
 
     /*Compute Lambert Shaders*/
