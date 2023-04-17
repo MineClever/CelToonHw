@@ -18,7 +18,7 @@ exit
 call :setLocalEnv
 
 
-set softwaveName="Substance Painter.exe"
+set softwaveName="Adobe Substance 3D Painter.exe"
 echo 接下来将会结束正在工作的%softwaveName%进程,请注意保存文件后,继续执行下一步
 PAUSE
 echo 确定清楚啦!
