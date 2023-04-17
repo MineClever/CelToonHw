@@ -492,6 +492,24 @@ float3 unpackZeroOne (float3 map)
     return (map.rgb * 2.0f - 1.0f);
 }
 
+
+// UDIM贴图读取函数
+float4 UDIMTextureLookup(Texture2DArray texArray, SamplerState texSampler, float2 uv, int tileID)
+{
+    // 计算小块的行列索引
+    int row = tileID / 10;
+    int col = tileID % 10;
+    
+    // 计算小块的UV偏移量
+    float2 offset = float2(col * 0.1, row * 0.1);
+    
+    // 计算纹理采样位置
+    float2 texCoord = uv * 0.1 + offset;
+    
+    // 返回纹理采样结果
+    return texArray.Sample(texSampler, float3(texCoord, 0));
+}
+
 ////////////////////////////////////////
 ////// Lighting ////////////////////////
 ////////////////////////////////////////
