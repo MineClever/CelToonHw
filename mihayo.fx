@@ -119,8 +119,8 @@ float _outlineWeightScale
 <
     string UIGroup = "Outline Parameter";
     string UIName = "Outline Scale";
-    float UIMin = 0.000;
-    float UIMax = 10.000;
+    float UIMin = 0.000000001;
+    float UIMax = 10000.0;
     float UIStep = 0.001;
     int UIOrder = 22;
 > = 1.0f;
@@ -129,7 +129,7 @@ bool bUseOutlineColor
 <
     string UIGroup = "Outline Parameter";
     string UIName =  "Use Outline Color";
-    int UIOrder = 23;
+    int UIOrder = 24;
 > = false;
 
 
@@ -555,7 +555,7 @@ float3 getCameraPos ()
 float fixCameraLengthOp (float3 pos, half scale=0.001)
 {
     float camLength = length(pos - getCameraPos());
-    return bKeepOutlineWidth ? (scale * camLength * 0.1) : (scale / camLength);
+    return bKeepOutlineWidth ? (scale * camLength * 0.1) : scale / camLength;
 }
 
 ////////////////////////////////////////
@@ -619,9 +619,9 @@ shared v2f shader_outline_vs (in a2v v)
 
     /* Make outline shell */
     // Fix distance from view
-    o.pos = mul(v.vertex, ObjectToView); // ViewSpace position
+    o.pos = mul(v.vertex, ObjectToView); // position
     float offsetValue = fixCameraLengthOp(o.pos.xyz, _outlineWeightScale);
-    float4 vertexOffset = float4( v.vertex.xyz + (offsetValue * v.normal.xyz) * abs(v.vertexColor.zzz) , 1.0);
+    float4 vertexOffset = float4( v.vertex.xyz + (offsetValue * normalize(v.normal.xyz)) * abs(v.vertexColor.zzz) , 1.0);
     o.pos = mul(vertexOffset, ObjectToView);
     o.pos.z += bUseZFix ? -offsetValue : 0.0;
     o.pos = mul(o.pos, ViewToProj);
