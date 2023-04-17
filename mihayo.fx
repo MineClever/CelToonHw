@@ -460,27 +460,29 @@ struct v2f
 
 /*Here my function*/
 
-
-
-float powerGamma(float img)
+////////////////////////////////////////
+////// Decode sRGB /////////////////////
+////////////////////////////////////////
+float sRGB2linear(float x)
 {
-    return pow(abs(img),_GAMMA_NUM_);
+  return x <= 0.04045 ?
+    x * 0.0773993808 : // 1.0/12.92
+    pow((x + 0.055) / 1.055, 2.4);
 }
 
-float2 powerGamma(float2 img)
+float3 sRGB2linear(float3 rgb)
 {
-    return pow(abs(img),_GAMMA_NUM_);
+  return float3(
+    sRGB2linear(rgb.r),
+    sRGB2linear(rgb.g),
+    sRGB2linear(rgb.b));
 }
 
-float3 powerGamma(float3 img)
+float4 sRGB2linear(float4 rgba)
 {
-    return pow(abs(img),_GAMMA_NUM_);
+  return float4(sRGB2linear(rgba.rgb), rgba.a);
 }
 
-float4 powerGamma(float4 img)
-{
-    return float4(pow(abs(img).rgb,_GAMMA_NUM_),img.a);
-}
 
 ////////////////////////////////////////
 ////// Normal //////////////////////////
@@ -500,7 +502,7 @@ float unclampLambertShader(in float3 N,in float3 L)
 }
 float3 RampLighting (float U ,float V,Texture2D rampmap)
 {
-    return powerGamma(rampmap.SampleLevel( BaseTexSampler, float2(U,V),0).rgb);
+    return sRGB2linear(rampmap.SampleLevel( BaseTexSampler, float2(U,V),0).rgb);
 }
 
 ////////////////////////////////////////
@@ -594,7 +596,7 @@ shared v2f shader_outline_vs (in a2v v)
     /*BasePart*/
     v2f o;
     /* Sample outline color into uv */
-    o.uv.xyz =  bUseOutlineColor ? _outlineColor : powerGamma(gOutlineColorTex.SampleLevel(BaseTexSampler,v.uv.xy,0).rgb);
+    o.uv.xyz =  bUseOutlineColor ? _outlineColor : sRGB2linear(gOutlineColorTex.SampleLevel(BaseTexSampler,v.uv.xy,0).rgb);
     o.uv.w = 1.0;
 
     /* Make outline shell */
@@ -654,11 +656,11 @@ shared float4 shader_ps (v2f i) : SV_Target
     float4 lightInfo = gLightinfoTex.Sample(BaseTexSampler,i.uv.xy);
 
     //Remerber to decode color in gamma-space
-    float4 mainColor = powerGamma(gMainTex.Sample(BaseTexSampler,i.uv.xy)); // Decode gamma into linear;
+    float4 mainColor = sRGB2linear(gMainTex.Sample(BaseTexSampler,i.uv.xy)); // Decode gamma into linear;
     mainColor.rgb = bUseSurfaceColor ? gSurfaceColor.rgb : mainColor.rgb; // where using shader color ...
-    half3 curFirstShadowCol = bUseShadowColors  ? _firstShadowMultColor     : powerGamma(gFirstShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb);
-    half3 curSecShadowCol   = bUseShadowColors  ? _secondShadowMultColor    : powerGamma(gSecondShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb);
-    half3 curSpecularCol    = bUseSpecularColor ? _specularColor            : powerGamma(gSpecualColorTex.Sample(BaseTexSampler,i.uv.xy).rgb);
+    half3 curFirstShadowCol = bUseShadowColors  ? _firstShadowMultColor     : sRGB2linear(gFirstShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb);
+    half3 curSecShadowCol   = bUseShadowColors  ? _secondShadowMultColor    : sRGB2linear(gSecondShadowTex.Sample(BaseTexSampler,i.uv.xy).rgb);
+    half3 curSpecularCol    = bUseSpecularColor ? _specularColor            : sRGB2linear(gSpecualColorTex.Sample(BaseTexSampler,i.uv.xy).rgb);
 
     /*Compute Lambert Shaders*/
     float unclampLambert = unclampLambertShader(N,L);
