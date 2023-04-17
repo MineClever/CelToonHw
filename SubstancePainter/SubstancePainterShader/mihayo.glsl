@@ -260,6 +260,15 @@ float getMaskValue(SamplerSparse sampler, SparseCoord coord, float defaultValue)
   return getMaskValue(textureSparse(sampler, coord), defaultValue);
 }
 
+vec3 getUserColor(vec4 sampledValue)
+{
+  return (sampledValue.rgb);
+}
+
+vec3 getUserColor(SamplerSparse sampler, SparseCoord coord)
+{
+  return getUserColor(textureSparse(sampler, coord));
+}
 
 //////////////////////////////////////////////////////
 /* Main Fragment Shader */
@@ -289,9 +298,9 @@ void shade(V2F inputs) {
 
     vec3 mainColor = getBaseColor(basecolor_tex, sp_uv);
     // color display not right in user channel ??? ...
-    vec3 curFirstShadowCol = (getBaseColor(first_shadow_color,sp_uv));
-    vec3 curSecShadowCol = (getBaseColor(second_shadow_color,sp_uv));
-    vec3 curSpecularCol = getBaseColor(specular_color,sp_uv);
+    vec3 curFirstShadowCol = getUserColor(first_shadow_color,sp_uv);
+    vec3 curSecShadowCol = getUserColor(second_shadow_color,sp_uv);
+    vec3 curSpecularCol = getUserColor(specular_color,sp_uv);
 
     /*Compute Lambert Shaders*/
     float unclampLambert = unclampLambertShader(N,L);
