@@ -2,3 +2,4 @@
 *.swatch
 .mayaSwatches/
 *.painter_lock
+autosave/
