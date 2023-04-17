@@ -670,7 +670,7 @@ shared float4 shader_ps (v2f i) : SV_Target
         /*first Shadow term */
     float diffuseMask = lightInfo.y * i.vertexColor.x;
     /*Shadow Core*/
-    float3 preBaseColor = bUseConstantShadowCol ? float3(1.0f) : mainColor.rgb;
+    float3 preBaseColor = bUseConstantShadowCol ? float3(1.0f, 1.0f, 1.0f) : mainColor.rgb;
         /*Step method*/
     if (diffuseMask > 0.1 )
     { /*(vtxColor.x * LightInfoMap.y + halfLambert) *0.5 - _firstShadow > 0*/
@@ -704,7 +704,7 @@ shared float4 shader_ps (v2f i) : SV_Target
     //float NdotH = dot(N, normalize(gLamp0Dir + getCameraDir()));
     float NdotH = dot(N, H);
     float shinePow = pow(max(NdotH,0.0),_shiniess);
-    float3 spec = shinePow + lightInfo.z > 1.0f ? lightInfo.x * _specMulti : float3(0.0,0.0,0.0);
+    float3 spec = shinePow + lightInfo.z > 1.0f ? lightInfo.x * _specMulti : float3(0.0, 0.0, 0.0);
 
     /*Compute RimLight*/
     #ifdef _USE_RIM_LIGHT_
